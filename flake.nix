@@ -17,18 +17,6 @@
   # (and its man) on both the native and Windows paths.
   outputs = { self, unpins-lib }:
     let
-      pkgsX = unpins-lib.inputs.nixpkgs.legacyPackages.x86_64-linux;
-
-      # The Windows binary's man comes from a graft, not its own cross build
-      # (mkStandaloneFlake's winManSrc). The default graft is nixpkgs' cpio,
-      # whose share/man carries cpio.1 AND rmt.8 — and we don't ship rmt. Pin
-      # a curated single-page tree so the .exe embeds exactly `cpio.1`, the
-      # same page the native side keeps after pruning.
-      winMan = pkgsX.runCommand "cpio-win-man" { } ''
-        mkdir -p "$out/share/man/man1"
-        zcat ${pkgsX.cpio}/share/man/man1/cpio.1.gz > "$out/share/man/man1/cpio.1"
-      '';
-
       # Drop the rmt helper + its man page so the package is a single binary.
       # Runs at postInstall (man pages are still uncompressed here; fixupPhase
       # gzips them later).
@@ -46,7 +34,10 @@
     unpins-lib.lib.mkStandaloneFlake {
       inherit self;
       name = "cpio";
-      winManRoot = winMan;
+      # No winManRoot: cpio.1 ships in-tree and `make install` installs it on
+      # every target — the cosmo cross included (verified: its $out/share/man
+      # has cpio.1.gz) — so the .exe harvests its OWN man, the same single page
+      # native keeps after the rmt prune. No graft.
       smoke = [ "--version" ];
       smokePattern = "GNU cpio";
       build = pkgs: pkgs.pkgsStatic.cpio.overrideAttrs prune;
