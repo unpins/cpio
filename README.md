@@ -1,13 +1,13 @@
 # cpio
 
-Standalone build of [GNU cpio](https://www.gnu.org/software/cpio/).
+[GNU cpio](https://www.gnu.org/software/cpio/) as a single self-contained binary, built natively for Linux, macOS, and Windows.
 
 [![CI](https://github.com/unpins/cpio/actions/workflows/cpio.yml/badge.svg)](https://github.com/unpins/cpio/actions)
 ![Linux](https://img.shields.io/badge/Linux-✓-success?logo=linux&logoColor=white)
 ![macOS](https://img.shields.io/badge/macOS-✓-success?logo=apple&logoColor=white)
 ![Windows](https://img.shields.io/badge/Windows-✓-success?logo=windows&logoColor=white)
 
-Part of the [unpins](https://unpins.org) project — native single-binary builds with no third-party runtime dependencies.
+Part of the [unpins](https://unpins.org) catalog; install it with [`unpin`](https://github.com/unpins/unpin): `unpin install cpio`.
 
 ## Usage
 
@@ -24,6 +24,10 @@ To install it onto your PATH:
 unpin install cpio
 ```
 
+## Man pages
+
+The `cpio` man page is embedded in the binary; read it with `unpin man cpio`.
+(The `rmt.8` page is dropped along with the helper.)
 ## Build locally
 
 ```bash
@@ -51,7 +55,3 @@ The [Releases](https://github.com/unpins/cpio/releases) page has standalone bina
   instead of mingw: cpio's device-number handling (`major`/`minor`/`makedev`)
   has no mingw equivalent, and Cosmopolitan libc provides `sys/sysmacros.h`.
 
-## Man pages
-
-The `cpio` man page is embedded in the binary; read it with `unpin man cpio`.
-(The `rmt.8` page is dropped along with the helper.)
