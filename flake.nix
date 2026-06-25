@@ -34,6 +34,11 @@
     unpins-lib.lib.mkStandaloneFlake {
       inherit self;
       name = "cpio";
+
+      engine = "unpin-llvm";
+      multicall = {
+        programs = [{ name = "cpio"; }];
+      };
       # No winManRoot: cpio.1 ships in-tree and `make install` installs it on
       # every target — the cosmo cross included (verified: its $out/share/man
       # has cpio.1.gz) — so the .exe harvests its OWN man, the same single page
