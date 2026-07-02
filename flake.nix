@@ -17,10 +17,15 @@
   # (and its man) on both the native and Windows paths.
   outputs = { self, unpins-lib }:
     let
-      # Drop the rmt helper + its man page so the package is a single binary.
-      # Runs at postInstall (man pages are still uncompressed here; fixupPhase
+      # Drop the rmt helper + its man page so the package is a single binary,
+      # and wire the native test suite. Kept as a drv->drv tune (not a bare attr
+      # override) so doCheck can read the build/host platforms off the drv. The
+      # prune runs at postInstall (man pages still uncompressed here; fixupPhase
       # gzips them later).
-      prune = old: {
+      tune = drv: drv.overrideAttrs (old: {
+        # GNU cpio's autotest suite (17/17) runs on native/i686 runners; auto-
+        # skips on crosses the build host can't execute (Windows here = cosmo).
+        doCheck = drv.stdenv.buildPlatform.canExecute drv.stdenv.hostPlatform;
         postInstall = (old.postInstall or "") + "\n" + ''
           for o in $outputs; do
             d="''${!o}"
@@ -29,7 +34,7 @@
             rmdir "$d/share/man/man8" 2>/dev/null || true
           done
         '';
-      };
+      });
     in
     unpins-lib.lib.mkStandaloneFlake {
       inherit self;
@@ -45,7 +50,7 @@
       # native keeps after the rmt prune. No graft.
       smoke = [ "--version" ];
       smokePattern = "GNU cpio";
-      build = pkgs: pkgs.pkgsStatic.cpio.overrideAttrs prune;
+      build = pkgs: tune pkgs.pkgsStatic.cpio;
       # Windows via Cosmopolitan, not mingw: cpio's configure can't determine
       # the return type of major()/minor() under mingw (Windows has no device
       # numbers / sys/sysmacros.h), and the archive code references
@@ -64,7 +69,7 @@
       # link, never a direct `ld -r`.
       windowsBuild = pkgs:
         let
-          pruned = (unpins-lib.lib.cosmoStaticCross pkgs).cpio.overrideAttrs prune;
+          pruned = tune (unpins-lib.lib.cosmoStaticCross pkgs).cpio;
           flag = " -Wl,--allow-multiple-definition";
         in
         pruned.overrideAttrs (old:
