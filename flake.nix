@@ -26,6 +26,14 @@
         # GNU cpio's autotest suite (17/17) runs on native/i686 runners; auto-
         # skips on crosses the build host can't execute (Windows here = cosmo).
         doCheck = drv.stdenv.buildPlatform.canExecute drv.stdenv.hostPlatform;
+        # DEFAULT_RMT_COMMAND defaults to $libexecdir/rmt, i.e. the store path
+        # we delete right below — so the shipped binary carried a dead store
+        # reference. It is not even a local path: cpio passes it to the REMOTE
+        # host over rsh/ssh (lib/rtapelib.c), where a /nix/store name is
+        # meaningless. /etc/rmt is the traditional location the remote side is
+        # expected to provide, and `--rmt-command=` still overrides at runtime.
+        # The option also skips building the rmt helper we drop anyway.
+        configureFlags = (old.configureFlags or [ ]) ++ [ "--with-rmt=/etc/rmt" ];
         postInstall = (old.postInstall or "") + "\n" + ''
           for o in $outputs; do
             d="''${!o}"
