@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [2.15-2] - 2026-09-26
+
 ### Fixed
 
 - Remote archives (`cpio -F host:file`, over rsh/ssh) asked the remote host to
