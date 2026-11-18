@@ -12,6 +12,7 @@
 { unpins-lib, tune }:
 pkgs:
 (tune (unpins-lib.lib.cosmoStaticCross pkgs).cpio).overrideAttrs (old: {
+  patches = (old.patches or [ ]) ++ [ ./patches/windows-crlf-names.patch ];
   env = (old.env or { }) // {
     NIX_CFLAGS_COMPILE = toString [ (old.env.NIX_CFLAGS_COMPILE or "") "-fgnu89-inline" ];
   };

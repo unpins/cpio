@@ -1,0 +1,42 @@
+On Windows a list of names from `dir /b`, `where` or any text file ends its
+lines in CRLF, and cpio kept the CR as part of each name: `dir /b | cpio -o`
+failed with "f.txt\r: Cannot stat". Drop a CR before the newline in every
+newline-terminated list cpio reads (names for -o/-p, -E patterns, rename
+answers), on Windows only: elsewhere a CR is a legal byte of a file name.
+
+--- a/src/dstring.c
++++ b/src/dstring.c
+@@ -73,6 +73,21 @@
+    Return NULL if end of file is detected.  Otherwise,
+    Return a pointer to the null-terminated string in S.  */
+ 
++#ifdef __COSMOPOLITAN__
++# include <sys/utsname.h>
++/* uname, not IsWindows(): that one needs _COSMO_SOURCE before the first
++   libc header.  */
++static int
++on_windows (void)
++{
++  static int w = -1;
++  struct utsname u;
++  if (w < 0)
++    w = !uname (&u) && !strcmp (u.sysname, "Windows");
++  return w;
++}
++#endif
++
+ char *
+ ds_fgetstr (FILE *f, dynamic_string *s, char eos)
+ {
+@@ -87,6 +102,11 @@
+       ds_resize (s, 0);
+       s->ds_string[s->ds_idx++] = next_ch;
+     }
++#ifdef __COSMOPOLITAN__
++  if (eos == '\n' && s->ds_idx > 0 && s->ds_string[s->ds_idx - 1] == '\r'
++      && on_windows ())
++    s->ds_idx--;
++#endif
+   ds_resize (s, 0);
+   s->ds_string[s->ds_idx] = '\0';
+ 

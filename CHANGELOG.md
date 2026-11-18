@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- On Windows, file lists with CRLF line endings work: `dir /b | cpio -o` used
+  to fail with "Cannot stat" on every name, because cpio kept the carriage
+  return as part of it.
+
 ## [2.15-2] - 2026-09-26
 
 ### Fixed
