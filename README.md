@@ -27,7 +27,7 @@ unpin install cpio
 ## Man pages
 
 The `cpio` man page is embedded in the binary; read it with `unpin man cpio`.
-(The `rmt.8` page is dropped along with the helper.)
+
 ## Build locally
 
 ```bash
@@ -49,8 +49,10 @@ The [Releases](https://github.com/unpins/cpio/releases) page has standalone bina
 
 ## Build notes
 
-- Single binary. The `rmt` remote-tape helper (a second executable GNU cpio
-  installs into `libexec/`) is dropped — unpins ships one self-contained `cpio`.
+- Not included: `rmt`, the remote-tape helper GNU cpio can build (remote
+  archives still work against the remote host's own `/etc/rmt`, or the
+  program `--rmt-command` names), and `mt`, which upstream builds only with
+  `--enable-mt`.
 - **Windows** is built with [Cosmopolitan](https://github.com/jart/cosmopolitan)
   instead of mingw: cpio's device-number handling (`major`/`minor`/`makedev`)
   has no mingw equivalent, and Cosmopolitan libc provides `sys/sysmacros.h`.
